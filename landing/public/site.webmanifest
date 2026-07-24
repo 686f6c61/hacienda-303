@@ -1,0 +1,23 @@
+{
+  "name": "Hacienda 303",
+  "short_name": "Hacienda 303",
+  "description": "Facturas en fila para preparar el Libro de IVA.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffd800",
+  "theme_color": "#ffd800",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

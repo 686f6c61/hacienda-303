@@ -1,0 +1,9 @@
+node_modules/
+landing/node_modules/
+landing/dist/
+.env
+.env.*
+*.log
+.DS_Store
+.vite/
+dist/

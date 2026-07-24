@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://hacienda-303.686f6c61.dev/sitemap.xml

@@ -1,0 +1,10 @@
+.git
+.github
+.qa
+.openai
+node_modules
+landing/node_modules
+landing/dist
+.env
+.env.*
+*.log
