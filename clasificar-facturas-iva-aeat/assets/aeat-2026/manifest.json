@@ -1,0 +1,42 @@
+{
+  "version": "2026-06-08",
+  "downloaded_at": "2026-07-24",
+  "publisher": "Agencia Estatal de Administración Tributaria",
+  "files": {
+    "LSI.xlsx": {
+      "sha256": "d35e92f2ebcdfba9d2d836da13f677758c27fd04f3903280accfd18ea6db497d",
+      "url": "https://sede.agenciatributaria.gob.es/static_files/AEAT/LSI.xlsx",
+      "purpose": "Diseño normalizado común IVA e IRPF"
+    },
+    "LSIJ.xlsx": {
+      "sha256": "963e653c2f2ffca8d894886965bb528b853801b7afa58643155681e396c8d1eb",
+      "url": "https://sede.agenciatributaria.gob.es/static_files/AEAT/LSIJ.xlsx",
+      "purpose": "Diseño normalizado IVA para personas jurídicas no SII"
+    },
+    "PLANTILLA_LIBROS_Pers_Juridicas.xlsx": {
+      "sha256": "2abf03f1ca63fa548ea6cfa6388918ae069461a781ed1106f101fbdc92164333",
+      "url": "https://sede.agenciatributaria.gob.es/static_files/Sede/Tema/IVA/Fact_registro/Libros/PLANTILLA_LIBROS_Pers_Juridicas.xlsx",
+      "purpose": "Plantilla oficial para personas jurídicas"
+    },
+    "PLANTILLA_LIBROS_UNIFICADOS.xlsx": {
+      "sha256": "0dd42d6b40d9388365624ae2ed7f301d8479ec92271b4eac06d2440096f49ebc",
+      "url": "https://sede.agenciatributaria.gob.es/static_files/Sede/Tema/IVA/Fact_registro/Libros/PLANTILLA_LIBROS_UNIFICADOS.xlsx",
+      "purpose": "Plantilla oficial unificada IVA e IRPF"
+    },
+    "CALCULO_CASILLAS_IVA_PRE303-LSI.xlsx": {
+      "sha256": "700a42a33259eef838a4d78bee4228d987a2ecec8519bf0c1ab421a68b9ed4fb",
+      "url": "https://sede.agenciatributaria.gob.es/static_files/Sede/Tema/IVA/Fact_registro/Libros_registro/CALCULO_CASILLAS_IVA_PRE303-LSI.xlsx",
+      "purpose": "Especificaciones oficiales de cálculo de casillas Pre303"
+    },
+    "Epigrafes_x_EEDD.xlsx": {
+      "sha256": "f6348e7454ba78b3dcebc5749fd059cc12b649084cb606faa7bda482c67c44e5",
+      "url": "https://sede.agenciatributaria.gob.es/static_files/Sede/Tema/IVA/Fact_registro/Libros_registro/Epigrafes_x_EEDD.xlsx",
+      "purpose": "Códigos y epígrafes de actividades económicas"
+    },
+    "Formato_Electronico_Comun_Libros_Registro_IVA_IRPF.pdf": {
+      "sha256": "071bdaabc3736e2e6def49be35c11fec744a74d5a9ab3f2ac50a2b1aa6fd7d22",
+      "url": "https://sede.agenciatributaria.gob.es/static_files/Sede/Tema/IVA/Fact_registro/Libros_registro/Formato_Electronico_Comun_Libros_Registro_IVA_IRPF.pdf",
+      "purpose": "Especificaciones 2025-2026, versión 18-02-2026"
+    }
+  }
+}

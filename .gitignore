@@ -1,0 +1,38 @@
+# Dependencias y compilados
+node_modules/
+landing/node_modules/
+dist/
+landing/dist/
+
+# Configuración local
+.env
+.env.*
+!.env.example
+.DS_Store
+*.log
+
+# Material de trabajo interno
+.qa/
+.openai/
+AGENTS.md
+design-qa.md
+/scripts/
+/tests/
+/worker/
+.vite/
+
+# Resultados fiscales y documentos del usuario
+work/
+output/
+outputs/
+facturas/
+*.jsonl
+*.csv
+*.ods
+
+# Cachés de Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/

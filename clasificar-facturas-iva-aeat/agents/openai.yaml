@@ -1,0 +1,6 @@
+interface:
+  display_name: "Facturas, libros IVA y Pre303 AEAT"
+  short_description: "Procesa lotes y genera libros IVA AEAT revisados"
+  default_prompt: "Usa $clasificar-facturas-iva-aeat en modo local para inventariar y clasificar estas facturas, revisar OCR y duplicados y, con perfil fiscal, generar por separado el libro de auditoría y el XLSX estricto de importación AEAT. No consultes Internet ni presentes declaraciones."
+policy:
+  allow_implicit_invocation: true
