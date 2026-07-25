@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 
 import openpyxl
@@ -68,6 +69,10 @@ def main() -> int:
         output.parent.mkdir(parents=True, exist_ok=True)
     workbook.save(output)
     workbook.close()
+    try:
+        os.chmod(output, 0o600)
+    except OSError:
+        pass  # el sistema de ficheros no admite permisos POSIX
     size = output.stat().st_size
     if size > 4 * 1024 * 1024:
         output.unlink(missing_ok=True)

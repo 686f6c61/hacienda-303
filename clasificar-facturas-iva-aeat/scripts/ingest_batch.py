@@ -12,6 +12,7 @@ import os
 import shutil
 import stat
 import subprocess
+import sys
 import tempfile
 import zipfile
 from datetime import datetime, timezone
@@ -42,6 +43,19 @@ SUPPORTED_EXTENSIONS = {
     ".xml": "xml",
     ".txt": "text",
 }
+MAX_WORKERS = 16
+
+
+def worker_count(value: str) -> int:
+    try:
+        workers = int(value)
+    except ValueError as error:
+        raise argparse.ArgumentTypeError("workers debe ser un entero") from error
+    if not 1 <= workers <= MAX_WORKERS:
+        raise argparse.ArgumentTypeError(
+            f"workers debe estar entre 1 y {MAX_WORKERS}"
+        )
+    return workers
 
 
 def parse_args() -> argparse.Namespace:
@@ -53,7 +67,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--ocr", choices=("auto", "always", "never"), default="auto"
     )
-    parser.add_argument("--workers", type=int, default=min(4, os.cpu_count() or 1))
+    parser.add_argument(
+        "--workers",
+        type=worker_count,
+        default=min(4, os.cpu_count() or 1),
+        help=f"Procesos concurrentes de extracción (1-{MAX_WORKERS}).",
+    )
     parser.add_argument("--max-entries", type=int, default=10000)
     parser.add_argument("--max-file-mb", type=int, default=100)
     parser.add_argument("--max-total-mb", type=int, default=2048)
@@ -94,15 +113,21 @@ def safe_extract_zip(
     max_entries: int,
     max_file_bytes: int,
     max_total_bytes: int,
+    budget: dict[str, int] | None = None,
 ) -> list[Path]:
+    # El presupuesto se comparte entre ZIPs (incluidos los anidados) para que
+    # los límites anti zip-bomb sean globales al lote, no por archivo.
+    if budget is None:
+        budget = {"entries": 0, "total_bytes": 0}
     destination.mkdir(parents=True, exist_ok=True)
     extracted: list[Path] = []
-    total = 0
     with zipfile.ZipFile(archive) as bundle:
         infos = bundle.infolist()
-        if len(infos) > max_entries:
+        budget["entries"] += len(infos)
+        if budget["entries"] > max_entries:
             raise ValueError(
-                f"{archive.name}: {len(infos)} entradas exceden el límite {max_entries}"
+                f"{archive.name}: {budget['entries']} entradas acumuladas "
+                f"exceden el límite global {max_entries}"
             )
         for info in infos:
             relative = safe_member_path(info.filename)
@@ -113,9 +138,10 @@ def safe_extract_zip(
                 raise ValueError(
                     f"{archive.name}: {info.filename} excede el límite por archivo"
                 )
-            total += info.file_size
-            if total > max_total_bytes:
-                raise ValueError(f"{archive.name}: tamaño descomprimido total excesivo")
+            if budget["total_bytes"] + info.file_size > max_total_bytes:
+                raise ValueError(
+                    f"{archive.name}: tamaño descomprimido total global excesivo"
+                )
 
             target = destination / relative
             resolved_parent = target.parent.resolve()
@@ -125,8 +151,27 @@ def safe_extract_zip(
                 target.mkdir(parents=True, exist_ok=True)
                 continue
             target.parent.mkdir(parents=True, exist_ok=True)
-            with bundle.open(info) as source, target.open("wb") as output:
-                shutil.copyfileobj(source, output, length=1024 * 1024)
+            file_bytes = 0
+            try:
+                with bundle.open(info) as source, target.open("wb") as output:
+                    while chunk := source.read(1024 * 1024):
+                        file_bytes += len(chunk)
+                        if file_bytes > max_file_bytes:
+                            raise ValueError(
+                                f"{archive.name}: {info.filename} excede el "
+                                "límite real por archivo"
+                            )
+                        if budget["total_bytes"] + len(chunk) > max_total_bytes:
+                            raise ValueError(
+                                f"{archive.name}: tamaño descomprimido total "
+                                "global real excesivo"
+                            )
+                        output.write(chunk)
+                        budget["total_bytes"] += len(chunk)
+            except Exception:
+                target.unlink(missing_ok=True)
+                raise
+            restrict_permissions(target)
             extracted.append(target)
     return extracted
 
@@ -135,6 +180,7 @@ def expand_nested_zips(
     root: Path,
     depth: int,
     limits: tuple[int, int, int],
+    budget: dict[str, int] | None = None,
 ) -> None:
     if depth <= 0:
         return
@@ -145,8 +191,15 @@ def expand_nested_zips(
         destination = archive.with_name(f"{archive.stem}__contenido")
         if destination.exists():
             continue
-        safe_extract_zip(archive, destination, *limits)
-        expand_nested_zips(destination, depth - 1, limits)
+        safe_extract_zip(archive, destination, *limits, budget=budget)
+        expand_nested_zips(destination, depth - 1, limits, budget)
+
+
+def restrict_permissions(path: Path) -> None:
+    try:
+        os.chmod(path, 0o600)
+    except OSError:
+        pass  # el sistema de ficheros no admite permisos POSIX
 
 
 def command_version(command: str, args: list[str]) -> str | None:
@@ -292,9 +345,14 @@ def extract_pdf(path: Path, ocr_mode: str, language: str | None) -> tuple[str, s
 def extract_xml(path: Path) -> str:
     raw = path.read_bytes()
     if SafeElementTree is None:
-        upper = raw[:10000].upper()
+        # Sin defusedxml solo cabe rechazar DTD/entidades; se escanea el
+        # documento completo, no solo el prólogo. defusedxml es recomendado.
+        upper = raw.upper()
         if b"<!DOCTYPE" in upper or b"<!ENTITY" in upper:
-            raise RuntimeError("XML con DTD/entidades rechazado")
+            raise RuntimeError(
+                "XML con DTD/entidades rechazado; instale defusedxml "
+                "para un análisis XML seguro"
+            )
         import xml.etree.ElementTree as element_tree
 
         root = element_tree.fromstring(raw)
@@ -362,8 +420,9 @@ def prepare_source(
         raise FileNotFoundError(input_path)
     if input_path.suffix.lower() == ".zip":
         originals = output / "originals"
-        extracted = safe_extract_zip(input_path, originals, *limits)
-        expand_nested_zips(originals, nested_depth, limits)
+        budget = {"entries": 0, "total_bytes": 0}
+        extracted = safe_extract_zip(input_path, originals, *limits, budget=budget)
+        expand_nested_zips(originals, nested_depth, limits, budget)
         return originals.resolve(), extracted, "zip"
     return input_path.parent.resolve(), [input_path.resolve()], "single_file"
 
@@ -460,11 +519,17 @@ def main() -> int:
     pending: dict[str, Path] = {}
     for digest, path in representatives.items():
         previous = previous_by_hash.get(digest)
-        previous_text = (
-            output / previous["text_path"]
-            if previous and previous.get("text_path")
-            else None
-        )
+        previous_text = None
+        if previous and previous.get("text_path"):
+            candidate = (output / previous["text_path"]).resolve()
+            if output in (candidate, *candidate.parents):
+                previous_text = candidate
+            else:
+                print(
+                    "aviso: text_path del manifiesto previo fuera del directorio "
+                    f"de salida, se ignora: {previous['text_path']}",
+                    file=sys.stderr,
+                )
         if (
             args.resume
             and previous
@@ -506,6 +571,7 @@ def main() -> int:
             not text_path.exists() or not args.resume
         ):
             text_path.write_text(result["text"], encoding="utf-8")
+            restrict_permissions(text_path)
         entry.update(
             {
                 "status": result["status"],
@@ -576,6 +642,7 @@ def main() -> int:
         encoding="utf-8",
     )
     os.replace(temporary, manifest_path)
+    restrict_permissions(manifest_path)
     print(json.dumps(manifest["summary"], ensure_ascii=False))
     return 0 if not manifest["summary"]["errors"] else 1
 

@@ -140,7 +140,7 @@ preguntó el agente y qué rama AEAT justificó la propuesta.
 
 ## Uso rápido con un lote
 
-Necesitas Python 3.11 o posterior. Instala la dependencia Python:
+Necesitas Python 3.10 o posterior. Instala las dependencias Python:
 
 ```bash
 python3 -m pip install -r \
@@ -225,7 +225,7 @@ Hacienda 303 no:
 
 ## Versionado y procedencia
 
-La versión actual es **1.0.0**. Los cambios se documentan en
+La versión actual es **1.1.0**. Los cambios se documentan en
 [CHANGELOG.md](CHANGELOG.md). Las plantillas, marcas y fuentes de terceros no
 quedan relicenciadas por la licencia MIT del código; consulta
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

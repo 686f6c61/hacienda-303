@@ -16,6 +16,7 @@ from aeat_book_common import (
     FIELDS_BY_BOOK,
     load_catalog,
     load_json_records,
+    normalize_code,
     parse_decimal,
     record_payload,
     validate_record,
@@ -84,6 +85,7 @@ def main() -> int:
         }
     )
     skipped = 0
+    excluded_by_period = 0
     invalid: list[str] = []
     for index, item in enumerate(input_records(args.input), start=1):
         book, row = record_payload(item)
@@ -92,8 +94,9 @@ def main() -> int:
             if errors:
                 invalid.append(f"registro {index}: {'; '.join(errors)}")
                 continue
-        row_period = row.get("periodo")
+        row_period = normalize_code(row.get("periodo"))
         if args.period and row_period != args.period:
+            excluded_by_period += 1
             continue
         if book == "EXPEDIDAS":
             key = (
@@ -119,26 +122,29 @@ def main() -> int:
         else:
             skipped += 1
             continue
+        try:
+            increments = {
+                "base": amount(row.get("base_imponible")),
+                "cuota_repercutida": amount(row.get("cuota_iva_repercutida")),
+                "cuota_soportada": amount(row.get("cuota_iva_soportada")),
+                "cuota_deducible": amount(row.get("cuota_deducible")),
+                "cuota_devengada_tecnica": Decimal("0"),
+            }
+            if book == "RECIBIDAS" and (
+                str(row.get("inversion_sujeto_pasivo") or "").upper()
+                in {"S", "SI", "SÍ", "TRUE"}
+                or str(row.get("clave_operacion_gasto") or "") == "09"
+            ):
+                increments["cuota_devengada_tecnica"] = increments[
+                    "cuota_soportada"
+                ]
+        except ValueError as error:  # importe malformado: no abortar la conciliación
+            invalid.append(f"registro {index}: {error}")
+            continue
         bucket = totals[key]
         bucket["filas"] = int(bucket["filas"]) + 1
-        bucket["base"] = Decimal(bucket["base"]) + amount(row.get("base_imponible"))
-        bucket["cuota_repercutida"] = Decimal(
-            bucket["cuota_repercutida"]
-        ) + amount(row.get("cuota_iva_repercutida"))
-        bucket["cuota_soportada"] = Decimal(bucket["cuota_soportada"]) + amount(
-            row.get("cuota_iva_soportada")
-        )
-        bucket["cuota_deducible"] = Decimal(bucket["cuota_deducible"]) + amount(
-            row.get("cuota_deducible")
-        )
-        if book == "RECIBIDAS" and (
-            str(row.get("inversion_sujeto_pasivo") or "").upper()
-            in {"S", "SI", "SÍ", "TRUE"}
-            or str(row.get("clave_operacion_gasto") or "") == "09"
-        ):
-            bucket["cuota_devengada_tecnica"] = Decimal(
-                bucket["cuota_devengada_tecnica"]
-            ) + amount(row.get("cuota_iva_soportada"))
+        for field, increment in increments.items():
+            bucket[field] = Decimal(bucket[field]) + increment
 
     groups = []
     for key, values in sorted(totals.items()):
@@ -181,6 +187,7 @@ def main() -> int:
         },
         "invalid_records": invalid,
         "skipped_investment_rows": skipped,
+        "excluded_by_period": excluded_by_period,
         "warning": "Control aritmético: no es el modelo 303 ni aplica todas sus casillas, ajustes o datos censales.",
     }
     print(json.dumps(result, ensure_ascii=False, indent=2))

@@ -1,0 +1,29 @@
+# Dependencias de la skill clasificar-facturas-iva-aeat.
+#
+# La skill son scripts que se ejecutan directamente
+# (`python3 scripts/build_aeat_book.py ...`); este archivo solo declara
+# dependencias — no empaqueta nada. Para instalarlas sin instalar la skill:
+#
+#   pip install $(python3 -c "import tomllib;print(' '.join(tomllib.load(open('pyproject.toml','rb'))['project']['dependencies']))")
+#
+# o simplemente: pip install "openpyxl>=3.1" "defusedxml>=0.7"
+
+[project]
+name = "clasificar-facturas-iva-aeat"
+version = "1.1.0"
+description = "Clasifica facturas españolas para IVA con los localizadores AEAT 2023-2026 y genera libros XLSX para Pre303"
+requires-python = ">=3.10"
+dependencies = [
+    # Obligatoria: lectura y escritura de los libros XLSX AEAT
+    # (build_aeat_book.py, prepare_aeat_import.py, validate_aeat_book.py,
+    # reconcile_books.py, extract_aeat_catalog.py).
+    "openpyxl>=3.1",
+    # Recomendada (efectivamente requerida para analizar XML de forma
+    # segura): sin ella, ingest_batch.py solo puede rechazar XML con
+    # DTD/entidades.
+    "defusedxml>=0.7",
+]
+
+[project.optional-dependencies]
+# Normalización de imágenes antes del OCR en ingest_batch.py.
+ocr = ["Pillow>=10"]

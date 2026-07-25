@@ -22,6 +22,8 @@ jobs:
       - run: pip install -r clasificar-facturas-iva-aeat/requirements.txt
       - name: Compilar scripts
         run: python -m py_compile clasificar-facturas-iva-aeat/scripts/*.py
+      - name: Ejecutar pruebas de regresión
+        run: python -m unittest discover -s clasificar-facturas-iva-aeat/tests -v
       - name: Consultar cobertura
         run: python clasificar-facturas-iva-aeat/scripts/query_index.py stats
       - name: Comprobar integridad SQLite

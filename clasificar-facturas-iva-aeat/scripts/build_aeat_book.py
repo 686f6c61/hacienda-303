@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import copy
 import json
+import os
 import re
 from decimal import Decimal
 from pathlib import Path
@@ -57,6 +58,13 @@ def parse_args() -> argparse.Namespace:
 
 def safe_filename_part(value: str) -> str:
     return re.sub(r'[<>:"/\\|?*\x00-\x1f]', "_", value).strip(" .")
+
+
+def restrict_permissions(path: Path) -> None:
+    try:
+        os.chmod(path, 0o600)
+    except OSError:
+        pass  # el sistema de ficheros no admite permisos POSIX
 
 
 def expected_filename(profile: dict[str, Any]) -> str:
@@ -181,6 +189,7 @@ def save_audit_workbook(
         audit_path.parent.mkdir(parents=True, exist_ok=True)
     audit_book.save(audit_path)
     audit_book.close()
+    restrict_permissions(audit_path)
     return audit_path
 
 
@@ -220,15 +229,27 @@ def main() -> int:
         values = dict(values)
         audit = audit_metadata(item)
         values.setdefault("referencia_externa", reference_from_audit(audit))
-        normalized, errors, warnings = validate_record(
-            book, values, profile, catalog
-        )
+        try:
+            normalized, errors, warnings = validate_record(
+                book, values, profile, catalog
+            )
+        except ValueError as error:  # nunca abortar el lote por una fila malformada
+            all_errors.append(f"registro {index}: validación interrumpida: {error}")
+            continue
         all_errors.extend(f"registro {index}: {error}" for error in errors)
         all_warnings.extend(f"registro {index}: {warning}" for warning in warnings)
         if not errors:
             rows[book].append(normalized)
             audit_rows[book].append(audit)
-            documented_total = parse_decimal(audit.get("factura_total_documento"))
+            try:
+                documented_total = parse_decimal(
+                    audit.get("factura_total_documento")
+                )
+            except ValueError as error:
+                all_errors.append(
+                    f"registro {index}: factura_total_documento: {error}"
+                )
+                continue
             invoice_identity = str(
                 audit.get("archivo_origen")
                 or str(audit.get("operacion_id") or "").split("#", 1)[0]
@@ -240,6 +261,7 @@ def main() -> int:
                     {
                         "expected": documented_total,
                         "subtotal": Decimal("0"),
+                        "lineas": 0,
                     },
                 )
                 if group["expected"] != documented_total:
@@ -247,11 +269,16 @@ def main() -> int:
                         f"{group_key}: factura_total_documento incoherente entre líneas"
                     )
                 group["subtotal"] += normalized.get("total_factura") or Decimal("0")
+                group["lineas"] += 1
     for group_key, amounts in invoice_totals.items():
-        if abs(amounts["subtotal"] - amounts["expected"]) > Decimal("0.02"):
+        # Cada línea redondea a céntimos (±0,005), así que la tolerancia crece
+        # con el número de líneas de la factura.
+        tolerance = max(Decimal("0.02"), Decimal("0.01") * amounts["lineas"])
+        if abs(amounts["subtotal"] - amounts["expected"]) > tolerance:
             all_errors.append(
                 f"{group_key}: suma de subtotales {amounts['subtotal']} no coincide "
-                f"con total documental {amounts['expected']}"
+                f"con total documental {amounts['expected']} "
+                f"(tolerancia {tolerance})"
             )
     if all_errors:
         print(
@@ -335,6 +362,7 @@ def main() -> int:
         output_path.parent.mkdir(parents=True, exist_ok=True)
     output_book.save(output_path)
     output_book.close()
+    restrict_permissions(output_path)
     size = output_path.stat().st_size
     if size > 4 * 1024 * 1024:
         output_path.unlink(missing_ok=True)

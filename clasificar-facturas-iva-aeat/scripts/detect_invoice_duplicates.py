@@ -7,6 +7,7 @@ import argparse
 import json
 import re
 from collections import defaultdict
+from decimal import InvalidOperation
 from pathlib import Path
 from typing import Any
 
@@ -34,7 +35,10 @@ def normalized_key(item: dict[str, Any]) -> tuple[str, str, str, str, str]:
         party = compact(row.get("nif_expedidor"))
         number = compact(row.get("factura_expedidor_serie_numero"))
     issued = parse_date(row.get("fecha_expedicion"))
-    total = parse_decimal(row.get("factura_total_documento"))
+    # El total documental vive en el objeto de auditoría (references/output-schema.md).
+    total = parse_decimal(item.get("factura_total_documento"))
+    if total is None:
+        total = parse_decimal(row.get("factura_total_documento"))
     if total is None:
         total = parse_decimal(row.get("total_factura"))
     return (
@@ -56,7 +60,7 @@ def main() -> int:
     for index, item in enumerate(records, start=1):
         try:
             key = normalized_key(item)
-        except ValueError:
+        except (ValueError, InvalidOperation):
             continue
         if key[1] and key[2] and key[3]:
             groups[key].append(label(item, index))

@@ -363,12 +363,14 @@ def derive_autoliquidation(
         return
     relevant: date | None = None
     if book == "EXPEDIDAS":
-        if values.get("clave_operacion") == "07" and values.get("fecha_cobro"):
+        clave = normalize_code(values.get("clave_operacion")) or ""
+        if clave.lstrip("0") == "7" and values.get("fecha_cobro"):
             relevant = values["fecha_cobro"]
         else:
             relevant = values.get("fecha_operacion") or values.get("fecha_expedicion")
     elif book == "RECIBIDAS":
-        if values.get("clave_operacion_gasto") == "07" and values.get("fecha_pago"):
+        clave = normalize_code(values.get("clave_operacion_gasto")) or ""
+        if clave.lstrip("0") == "7" and values.get("fecha_pago"):
             relevant = values["fecha_pago"]
         else:
             relevant = values.get("fecha_recepcion") or values.get("fecha_expedicion")
@@ -514,9 +516,14 @@ def validate_record(
         and cutoff_year not in (None, "")
         and cutoff_period in {"1T", "2T", "3T", "4T"}
     ):
-        if period_key(normalized["ejercicio"], period) > period_key(
-            int(cutoff_year), cutoff_period
-        ):
+        try:
+            cutoff_year_int = int(cutoff_year)
+        except (TypeError, ValueError):
+            cutoff_year_int = None
+            errors.append("perfil: ejercicio de corte no es un año válido")
+        if cutoff_year_int is not None and period_key(
+            normalized["ejercicio"], period
+        ) > period_key(cutoff_year_int, cutoff_period):
             errors.append(
                 "autoliquidación posterior al ejercicio/periodo de corte del perfil"
             )
@@ -533,9 +540,19 @@ def validate_record(
             )
         value = normalize_code(normalized[field])
         if actual_category in {"TIPO IVA", "TIPO RECARGO EQUIVALENCIA"}:
-            value = normalize_numeric_code(normalized[field])
+            try:
+                value = normalize_numeric_code(normalized[field])
+            except ValueError as error:
+                # El bucle de parseo ya pudo registrar este mismo campo.
+                value = ""
+                if not any(item.startswith(f"{field}:") for item in errors):
+                    errors.append(f"{field}: {error}")
         normalized[field] = value
-        if actual_category and value not in codes.get(actual_category, set()):
+        if (
+            actual_category
+            and value
+            and value not in codes.get(actual_category, set())
+        ):
             errors.append(
                 f"{field}: código {value!r} no existe en {actual_category}"
             )
@@ -652,6 +669,12 @@ def validate_record(
                 errors.append(
                     "operacion_exenta no debe coexistir con calificación S1/S2"
                 )
+            if normalized.get("tipo_iva") in (None, ""):
+                errors.append("tipo_iva: obligatorio para calificación S1/S2")
+            if normalized.get("cuota_iva_repercutida") in (None, ""):
+                errors.append(
+                    "cuota_iva_repercutida: obligatoria para calificación S1/S2"
+                )
         elif normalized.get("operacion_exenta") and normalized.get(
             "calificacion_operacion"
         ):
@@ -682,15 +705,19 @@ def validate_record(
         base = normalized.get("inicio_uso_base_imponible")
         rate = normalized.get("inicio_uso_tipo_iva")
         tax = None
-    if base is not None and rate is not None and tax is not None:
-        numeric_rate = parse_decimal(rate)
-        expected_tax = (
-            base * numeric_rate / Decimal("100")
-        ).quantize(Decimal("0.01"))
-        if abs(expected_tax - tax) > Decimal("0.02"):
-            warnings.append(
-                "cuota IVA no coincide con base × tipo dentro de tolerancia 0,02"
-            )
+    if base is not None and rate not in (None, "") and tax is not None:
+        try:
+            numeric_rate = parse_decimal(rate)
+        except ValueError:
+            numeric_rate = None
+        if numeric_rate is not None:
+            expected_tax = (
+                base * numeric_rate / Decimal("100")
+            ).quantize(Decimal("0.01"))
+            if abs(expected_tax - tax) > Decimal("0.02"):
+                warnings.append(
+                    "cuota IVA no coincide con base × tipo dentro de tolerancia 0,02"
+                )
 
     return normalized, errors, warnings
 
