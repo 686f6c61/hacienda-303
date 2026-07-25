@@ -4,19 +4,20 @@ import {
   LockKey, Play, Sparkle, TerminalWindow, WarningCircle, X,
 } from "@phosphor-icons/react";
 import { REPO_URL } from "./config.js";
+import { SiteFooter } from "./SiteFooter.jsx";
 
 const steps = [
   {
     number: "01",
-    title: "Baja el repositorio",
-    copy: "Ahí viven la skill, los cuatro agentes, SQLite, los scripts y las referencias. Todo junto; nada se busca por Internet.",
-    command: "git clone https://github.com/686f6c61/hacienda-303.git",
+    title: "Clona o descarga",
+    copy: "En GitHub puedes clonar el repositorio o pulsar «Code → Download ZIP» si no quieres utilizar comandos.",
+    command: "git clone …  o  Code → Download ZIP",
   },
   {
     number: "02",
-    title: "Abre Claude Code",
-    copy: "Entra en la carpeta del repositorio. Claude encontrará las instrucciones de arranque del proyecto.",
-    command: "cd hacienda-303 && claude",
+    title: "Abre tu agente",
+    copy: "Abre la carpeta hacienda-303 con Claude Code, Codex o Kimi. Dentro encontrará la skill y las instrucciones.",
+    command: "Claude Code · Codex · Kimi",
   },
   {
     number: "03",
@@ -36,10 +37,10 @@ export function StartPage() {
           <span className="brand-stamp">H</span><span>Hacienda 303</span>
         </a>
         <nav className={menuOpen ? "nav open" : "nav"} aria-label="Navegación de inicio">
-          <a href="#tres-pasos">Tres pasos</a>
-          <a href="#instalar">Instalar la skill</a>
-          <a href="#primer-lote">Primer lote</a>
-          <a href="/tecnica">Cómo está hecho</a>
+          <a href="#tres-pasos"><Play weight="fill" /> Tres pasos</a>
+          <a href="#instalar"><DownloadSimple weight="bold" /> Instalar la skill</a>
+          <a href="#primer-lote"><FolderOpen weight="fill" /> Primer lote</a>
+          <a href="/tecnica"><TerminalWindow weight="fill" /> Cómo está hecho</a>
         </nav>
         <a className="nav-cta" href={REPO_URL} target="_blank" rel="noreferrer">
           Repositorio <GithubLogo weight="fill" />
@@ -54,24 +55,24 @@ export function StartPage() {
         <section className="start-hero grid-bg">
           <div>
             <a className="back-link" href="/"><ArrowLeft weight="bold" /> Volver al producto</a>
-            <span className="kicker dark">CLAUDE CODE · SIN MANUAL ETERNO</span>
-            <h1>Abre la terminal.<br /><span>Di: «¿Cómo empiezo?»</span></h1>
-            <p>Clonas el repositorio, arrancas Claude Code y cuentas qué facturas tienes. Hacienda 303 pone el método; tú confirmas los hechos fiscales.</p>
+            <span className="kicker dark">UNA SKILL PARA CLAUDE · CODEX · KIMI</span>
+            <h1>Baja la carpeta.<br /><span>Di: «¿Cómo empiezo?»</span></h1>
+            <p>Clona el repositorio o bájatelo en ZIP, ábrelo con tu agente y cuenta qué facturas tienes. Hacienda 303 pone el método; tú confirmas los hechos fiscales.</p>
             <div className="hero-actions">
               <a className="button button-primary" href="#tres-pasos">
                 Empezar ahora <ArrowRight weight="bold" />
               </a>
-              <span className="privacy-note"><LockKey weight="fill" /> Siempre en tu equipo</span>
+              <span className="privacy-note"><LockKey weight="fill" /> Archivos y resultados en tu equipo</span>
             </div>
           </div>
 
-          <div className="start-terminal" aria-label="Ejemplo de inicio en Claude Code">
+          <div className="start-terminal" aria-label="Inicio de Hacienda 303 con un agente compatible">
             <div className="window-bar">
-              <span>terminal · hacienda-303</span>
+              <span>tu agente · hacienda-303</span>
               <span className="local-badge">LOCAL</span>
             </div>
             <div className="terminal-body">
-              <p><span>$</span> claude</p>
+              <p><span>1</span> Abre la carpeta con Claude, Codex o Kimi</p>
               <p className="terminal-question">› ¿Cómo empiezo?</p>
               <div className="terminal-answer">
                 <Sparkle weight="fill" />
@@ -83,7 +84,7 @@ export function StartPage() {
 
         <section className="start-steps" id="tres-pasos">
           <div className="section-heading compact">
-            <span className="kicker">TRES COMANDOS. YA ESTÁ.</span>
+            <span className="kicker">TRES PASOS. SIN SER TÉCNICO.</span>
             <h2>De cero<br /><span>al primer lote.</span></h2>
           </div>
           <div className="start-step-grid">
@@ -100,25 +101,25 @@ export function StartPage() {
 
         <section className="install-section grid-bg" id="instalar">
           <div className="install-copy">
-            <span className="kicker dark">SI QUIERES USARLA EN CUALQUIER CARPETA</span>
-            <h2>Instálala<br /><span>una vez.</span></h2>
-            <p>Claude Code descubre las skills personales en <code>~/.claude/skills/</code>. Copia allí la carpeta completa: necesita también SQLite, scripts y referencias.</p>
+            <span className="kicker dark">UNA SKILL ES EL MÉTODO COMPLETO</span>
+            <h2>Todo viene<br /><span>dentro.</span></h2>
+            <p>La skill reúne las instrucciones fiscales, los recorridos AEAT y las herramientas. Los adaptadores permiten que Claude Code, Codex y Kimi sigan el mismo proceso.</p>
             <a className="button button-primary" href={REPO_URL} target="_blank" rel="noreferrer">
-              <GithubLogo weight="fill" /> Abrir el repositorio
+              <GithubLogo weight="fill" /> Clonar o descargar
             </a>
           </div>
           <div className="install-command">
             <div className="window-bar">
-              <span>instalar · skill personal</span>
+              <span>hacienda-303 · todo incluido</span>
               <TerminalWindow weight="fill" />
             </div>
-            <pre><code>{`mkdir -p ~/.claude/skills
-cp -R clasificar-facturas-iva-aeat \\
-  ~/.claude/skills/
-
-claude
-/clasificar-facturas-iva-aeat`}</code></pre>
-            <small>También se activa sola cuando tu petición coincide con su descripción.</small>
+            <pre><code>{`hacienda-303/
+└── clasificar-facturas-iva-aeat/
+    ├── SKILL.md
+    ├── agents/
+    ├── scripts/
+    └── references/`}</code></pre>
+            <small>Abre la carpeta completa: la skill necesita también sus datos, scripts y referencias.</small>
           </div>
         </section>
 
@@ -134,7 +135,7 @@ claude
           <div className="first-batch-grid">
             <article>
               <FolderOpen weight="fill" />
-              <h3>Claude inventaria</h3>
+              <h3>El agente inventaria</h3>
               <p>Detecta formatos, duplicados, calidad de texto y documentos que necesitan OCR.</p>
             </article>
             <article>
@@ -154,8 +155,8 @@ claude
           <WarningCircle size={56} weight="fill" />
           <div>
             <span>IMPORTANTE</span>
-            <h2>Preparar no es presentar.</h2>
-            <p>Hacienda 303 crea libros revisables y una conciliación previa. No contabiliza, firma ni presenta el Modelo 303 por ti.</p>
+            <h2>Ayuda con el trimestre. No sustituye tu contabilidad.</h2>
+            <p>Hacienda 303 crea libros revisables y una conciliación previa. No sustituye tu ERP o programa contable, ni firma o presenta el Modelo 303 por ti.</p>
           </div>
           <a className="button button-secondary" href="/tecnica#limites">
             Ver los límites <ArrowRight weight="bold" />
@@ -165,27 +166,19 @@ claude
         <section className="tech-final grid-bg">
           <div>
             <span className="kicker dark">TU TURNO</span>
-            <h2>Abre Claude.<br />Suelta la carpeta.</h2>
+            <h2>Abre tu agente.<br />Suelta la carpeta.</h2>
             <p>Empieza con una frase normal. El método aparece cuando hace falta.</p>
           </div>
           <div className="tech-final-actions">
             <a className="button button-mega" href={REPO_URL} target="_blank" rel="noreferrer">
-              <DownloadSimple weight="bold" /> Bajar Hacienda 303
+              <DownloadSimple weight="bold" /> Clonar o bajar Hacienda 303
             </a>
             <a className="back-home" href="/"><ArrowLeft weight="bold" /> Volver al producto</a>
           </div>
         </section>
       </main>
 
-      <footer>
-        <div className="footer-brand"><span className="brand-stamp">H</span><strong>Hacienda 303</strong></div>
-        <div className="footer-links">
-          <a href={REPO_URL} target="_blank" rel="noreferrer"><GithubLogo weight="fill" /> GitHub</a>
-          <a href="/tecnica">Cómo está hecho</a>
-          <a href="/">Producto</a>
-        </div>
-        <p className="footer-small">Producto independiente y no oficial. Tus documentos se quedan en local.</p>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

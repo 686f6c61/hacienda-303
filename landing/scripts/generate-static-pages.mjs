@@ -7,9 +7,9 @@ const source = await readFile(new URL("index.html", distDirectory), "utf8");
 const pages = [
   {
     path: "empezar",
-    title: "Cómo empezar con Hacienda 303 en Claude Code",
+    title: "Cómo empezar con Hacienda 303 · Claude, Codex o Kimi",
     description:
-      "Instala Hacienda 303, abre Claude Code y convierte tu primera carpeta o ZIP de facturas en un lote revisable.",
+      "Clona o descarga Hacienda 303, abre la carpeta con Claude, Codex o Kimi y prepara tu lote de facturas para revisar.",
   },
   {
     path: "tecnica",

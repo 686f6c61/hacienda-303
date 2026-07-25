@@ -7,13 +7,13 @@ import {
 import { REPO_URL, REPO_ZIP_URL } from "./config.js";
 import { TechPage } from "./TechPage.jsx";
 import { StartPage } from "./StartPage.jsx";
+import { SiteFooter } from "./SiteFooter.jsx";
 import { applyPageSeo, normalizePath } from "./seo.js";
 
 const agents = [
-  { name: "OpenAI", detail: "Codex", color: "pink", logo: "/assets/logo-openai.svg" },
+  { name: "Codex", detail: "OpenAI", color: "pink", logo: "/assets/logo-openai.svg" },
   { name: "Claude", detail: "Anthropic", color: "green", logo: "/assets/logo-claude.svg" },
   { name: "Kimi K3", detail: "Moonshot", color: "yellow", logo: "/assets/logo-kimi.svg" },
-  { name: "GLM 5.2", detail: "Z.ai", color: "orange", logo: "/assets/logo-zai.svg" },
 ];
 
 const delivery = [
@@ -42,7 +42,7 @@ function scrollToId(id) {
 
 export function App() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [selectedAgent, setSelectedAgent] = useState("OpenAI");
+  const [selectedAgent, setSelectedAgent] = useState("Codex");
   const pathname = normalizePath(window.location.pathname);
 
   useEffect(() => {
@@ -71,11 +71,11 @@ export function App() {
           <span className="brand-stamp">H</span><span>Hacienda 303</span>
         </button>
         <nav className={menuOpen ? "nav open" : "nav"} aria-label="Navegación principal">
-          <button onClick={() => scrollToId("como-funciona")}>Cómo funciona</button>
-          <button onClick={() => scrollToId("entregables")}>Qué te llevas</button>
-          <button onClick={() => scrollToId("agentes")}>Agentes</button>
-          <a href="/empezar">Cómo empiezo</a>
-          <a href="/tecnica">Cómo está hecho</a>
+          <button onClick={() => { setMenuOpen(false); scrollToId("como-funciona"); }}><Files weight="fill" /> Cómo funciona</button>
+          <button onClick={() => { setMenuOpen(false); scrollToId("entregables"); }}><Table weight="fill" /> Qué te llevas</button>
+          <button onClick={() => { setMenuOpen(false); scrollToId("agentes"); }}><Sparkle weight="fill" /> Agentes</button>
+          <a href="/empezar"><TerminalWindow weight="fill" /> Cómo empiezo</a>
+          <a href="/tecnica"><Code weight="bold" /> Cómo está hecho</a>
         </nav>
         <a className="nav-cta" href={REPO_URL} target="_blank" rel="noreferrer">
           Ver repositorio <GithubLogo weight="fill" />
@@ -92,13 +92,13 @@ export function App() {
             <div className="pill"><Sparkle weight="fill" /> Tus facturas, por fin en fila</div>
             <h1>Del caos de facturas<span className="speech">al Libro de IVA</span></h1>
             <p className="hero-lede">
-              Sube una carpeta o un ZIP. Hacienda 303 lee, ordena y clasifica cada factura para que revises lo importante y descargues el libro AEAT.
+              Si te ha llegado el trimestre con facturas por ordenar, clona este repositorio o bájatelo en ZIP. La skill guía a Claude, Codex o Kimi para preparar tu Libro de IVA.
             </p>
             <div className="hero-actions">
-              <a className="button button-primary" href={REPO_URL} target="_blank" rel="noreferrer">
-                Abrir en GitHub <GithubLogo weight="fill" />
+              <a className="button button-primary" href="/empezar">
+                Ver cómo bajarlo <ArrowRight weight="bold" />
               </a>
-              <span className="privacy-note"><LockKey weight="fill" /> Tus documentos se quedan en local</span>
+              <span className="privacy-note"><LockKey weight="fill" /> Archivos y resultados guardados en tu equipo</span>
             </div>
           </div>
           <div className="hero-visual" aria-label="Una factura ordenando documentos para el Libro de IVA y el Modelo 303">
@@ -129,14 +129,14 @@ export function App() {
         <section className="steps-section" id="como-funciona">
           <div className="section-heading">
             <span className="kicker">TRES PASOS. CERO DRAMA.</span>
-            <h2>Tú subes.<br /><span>Hacienda 303 ordena.</span></h2>
+            <h2>Abres la carpeta.<br /><span>Hacienda 303 ordena.</span></h2>
             <p>No necesitas saber códigos fiscales para empezar. El producto te pregunta solo cuando una respuesta cambia el tratamiento de la factura.</p>
           </div>
           <div className="steps-grid">
             <article className="step-card pink-card">
               <span className="step-number">1</span><FolderOpen size={54} weight="fill" />
               <h3>Suelta el lote</h3>
-              <p>Un ZIP con cientos de facturas, una carpeta ordenada o fotos sueltas. Conservamos los originales intactos.</p>
+              <p>Con el repositorio abierto en tu agente, pásale un ZIP, una carpeta o fotos sueltas. Los originales quedan intactos.</p>
             </article>
             <article className="step-card green-card">
               <span className="step-number">2</span><MagnifyingGlass size={54} weight="bold" />
@@ -154,20 +154,20 @@ export function App() {
         <section className="repo-section grid-bg" id="repo">
           <div className="repo-copy">
             <span className="kicker dark">TODO EN EL MISMO REPOSITORIO</span>
-            <h2>Bájalo.<br />Hazlo tuyo.</h2>
-            <p>No ofrecemos una demo recortada. El repositorio contiene el producto completo para instalarlo y trabajar localmente con tus facturas.</p>
+            <h2>Clónalo.<br />O bájatelo.</h2>
+            <p>Si utilizas Git, clona el repositorio. Si no, descárgalo como ZIP desde GitHub. Dentro va la skill completa para trabajar con tus facturas.</p>
             <ul className="check-list">
               <li><Check weight="bold" /> La skill y sus reglas fiscales</li>
-              <li><Check weight="bold" /> Agentes para OpenAI, Claude, Kimi y GLM</li>
+              <li><Check weight="bold" /> Agentes para Codex, Claude y Kimi</li>
               <li><Check weight="bold" /> SQLite con 3.069 recorridos AEAT</li>
               <li><Check weight="bold" /> Scripts, plantillas y validadores</li>
             </ul>
             <div className="repo-actions">
               <a className="button button-primary" href={REPO_URL} target="_blank" rel="noreferrer">
-                <GithubLogo weight="fill" /> Ver en GitHub
+                <GithubLogo weight="fill" /> Clonar en GitHub
               </a>
               <a className="button button-secondary" href={REPO_ZIP_URL}>
-                <DownloadSimple weight="bold" /> Descargar ZIP
+                <DownloadSimple weight="bold" /> Bajarlo en ZIP
               </a>
             </div>
           </div>
@@ -179,7 +179,7 @@ export function App() {
             <div className="repo-tree">
               <div><FolderOpen weight="fill" /><strong>clasificar-facturas-iva-aeat/</strong></div>
               <div className="tree-child"><FileCode weight="fill" /><span>SKILL.md</span><small>el método</small></div>
-              <div className="tree-child"><Code weight="bold" /><span>agents/</span><small>4 adaptadores</small></div>
+              <div className="tree-child"><Code weight="bold" /><span>agents/</span><small>3 adaptadores</small></div>
               <div className="tree-child"><Database weight="fill" /><span>aeat_iva.sqlite</span><small>3.069 casos</small></div>
               <div className="tree-child"><TerminalWindow weight="fill" /><span>scripts/</span><small>ingesta + validación</small></div>
               <div className="tree-child"><Files weight="fill" /><span>references/</span><small>criterio y límites</small></div>
@@ -205,9 +205,9 @@ export function App() {
 
         <section className="agents-section" id="agentes">
           <div className="agent-intro">
-            <span className="kicker light">EL MISMO MÉTODO, TU AGENTE FAVORITO</span>
-            <h2>Funciona donde<br />ya trabajas.</h2>
-            <p>La skill contiene el criterio, las referencias AEAT y los scripts. Cada agente sigue el mismo flujo y entrega el mismo formato revisable.</p>
+            <span className="kicker light">UNA SKILL · TRES AGENTES</span>
+            <h2>Abre la carpeta.<br />Habla normal.</h2>
+            <p>Una skill es una carpeta con instrucciones, referencias AEAT y herramientas. Claude, Codex o Kimi la siguen para ordenar el lote y pedirte solo las decisiones que necesitan confirmación.</p>
           </div>
           <div className="agent-picker" role="tablist" aria-label="Agentes compatibles">
             {agents.map((agent) => (
@@ -221,7 +221,7 @@ export function App() {
             ))}
             <div className="agent-message">
               <span>Ahora mismo</span><strong>{selectedAgent}</strong>
-              <p>puede recibir un lote, aplicar la skill Hacienda 303 y dejar la revisión en el mismo punto que los demás.</p>
+              <p>puede abrir el repositorio, seguir la skill Hacienda 303 y dejar el lote preparado para tu revisión.</p>
             </div>
           </div>
         </section>
@@ -229,7 +229,8 @@ export function App() {
         <section className="truth-section">
           <div className="truth-title">
             <WarningCircle size={66} weight="fill" />
-            <h2>Automatiza mucho.<br />No decide por ti.</h2>
+            <h2>Te ayuda con el trimestre.<br />No sustituye tu contabilidad.</h2>
+            <p>Está pensado para quien llega al momento de preparar el IVA con facturas por ordenar. No sustituye tu ERP, tu programa contable ni el criterio final de tu asesor.</p>
           </div>
           <div className="truth-grid">
             <div>
@@ -262,20 +263,12 @@ export function App() {
             <p>Hacienda 303 las pone en fila. Tú mantienes el control fiscal.</p>
           </div>
           <a className="button button-mega" href={REPO_URL} target="_blank" rel="noreferrer">
-            Bajar el repositorio <GithubLogo weight="fill" />
+            Clonar o bajar el repositorio <GithubLogo weight="fill" />
           </a>
         </section>
       </main>
 
-      <footer>
-        <div className="footer-brand"><span className="brand-stamp">H</span><strong>Hacienda 303</strong></div>
-        <div className="footer-links">
-          <a href={REPO_URL} target="_blank" rel="noreferrer"><GithubLogo weight="fill" /> GitHub</a>
-          <a href="/empezar">Cómo empiezo</a>
-          <a href="/tecnica">Cómo está hecho</a>
-        </div>
-        <p className="footer-small">No es un servicio oficial de la Agencia Tributaria. Revisa antes de importar o presentar.</p>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

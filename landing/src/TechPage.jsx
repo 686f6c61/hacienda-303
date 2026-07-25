@@ -7,6 +7,7 @@ import {
   WarningCircle, X,
 } from "@phosphor-icons/react";
 import { REPO_URL, REPO_ZIP_URL } from "./config.js";
+import { SiteFooter } from "./SiteFooter.jsx";
 
 const pipeline = [
   {
@@ -37,7 +38,7 @@ const pipeline = [
 
 const repoRows = [
   ["SKILL.md", "Orquesta el proceso y fija cuándo preguntar, concluir o detenerse."],
-  ["agents/", "Adapta el mismo núcleo a Codex, Claude, Kimi K3 y GLM 5.2."],
+  ["agents/", "Adapta el mismo núcleo a Codex, Claude y Kimi K3."],
   ["assets/aeat_iva.sqlite", "Conserva los caminos terminales de los localizadores AEAT."],
   ["assets/aeat-2026/", "Plantillas, códigos y especificaciones oficiales con huellas."],
   ["scripts/ingest_batch.py", "Ingesta segura, OCR local, manifiesto y reanudación."],
@@ -56,11 +57,11 @@ export function TechPage() {
           <span className="brand-stamp">H</span><span>Hacienda 303</span>
         </a>
         <nav className={menuOpen ? "nav open" : "nav"} aria-label="Navegación técnica">
-          <a href="#arquitectura">Arquitectura</a>
-          <a href="#sqlite">SQLite</a>
-          <a href="#skill">La skill</a>
-          <a href="#limites">Límites</a>
-          <a href="/empezar">Cómo empiezo</a>
+          <a href="#arquitectura"><TreeStructure weight="fill" /> Arquitectura</a>
+          <a href="#sqlite"><Database weight="fill" /> SQLite</a>
+          <a href="#skill"><FileCode weight="fill" /> La skill</a>
+          <a href="#limites"><WarningCircle weight="fill" /> Límites</a>
+          <a href="/empezar"><TerminalWindow weight="fill" /> Cómo empiezo</a>
         </nav>
         <a className="nav-cta" href={REPO_URL} target="_blank" rel="noreferrer">
           Repositorio <GithubLogo weight="fill" />
@@ -91,7 +92,7 @@ export function TechPage() {
             <div className="stat-card purple"><b>3.069</b><span>casos terminales</span></div>
             <div className="stat-card pink"><b>21.679</b><span>pasos de decisión</span></div>
             <div className="stat-card green"><b>2</b><span>localizadores AEAT</span></div>
-            <div className="stat-card cream"><b>4</b><span>agentes compatibles</span></div>
+            <div className="stat-card cream"><b>3</b><span>agentes compatibles</span></div>
           </div>
         </section>
 
@@ -183,17 +184,17 @@ export function TechPage() {
 
         <section className="agents-tech-section">
           <div>
-            <span className="kicker light">CUATRO AGENTES · UN NÚCLEO</span>
+            <span className="kicker light">TRES AGENTES · UN NÚCLEO</span>
             <h2>El modelo cambia.<br />El método no.</h2>
           </div>
           <div className="adapter-diagram">
             <div className="core-node"><BracketsCurly size={48} weight="bold" /><strong>Skill + SQLite + scripts</strong></div>
             <ArrowRight className="diagram-arrow" size={42} weight="bold" />
             <div className="adapter-nodes">
-              <span>OpenAI · Codex</span><span>Claude</span><span>Kimi K3</span><span>Z.ai · GLM 5.2</span>
+              <span>OpenAI · Codex</span><span>Claude</span><span>Kimi K3</span>
             </div>
           </div>
-          <p>Los archivos de agente solo traducen el mismo contrato a cada plataforma. No duplican el conocimiento fiscal ni mantienen cuatro versiones distintas de las reglas.</p>
+          <p>Los archivos de agente solo traducen el mismo contrato a cada plataforma. No duplican el conocimiento fiscal ni mantienen tres versiones distintas de las reglas.</p>
         </section>
 
         <section className="limits-tech-section" id="limites">
@@ -227,15 +228,7 @@ export function TechPage() {
         </section>
       </main>
 
-      <footer>
-        <div className="footer-brand"><span className="brand-stamp">H</span><strong>Hacienda 303</strong></div>
-        <div className="footer-links">
-          <a href={REPO_URL} target="_blank" rel="noreferrer"><GithubLogo weight="fill" /> GitHub</a>
-          <a href="/empezar">Cómo empiezo</a>
-          <a href="/">Producto</a>
-        </div>
-        <p className="footer-small">Código abierto e independiente. No es un servicio oficial de la Agencia Tributaria.</p>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
